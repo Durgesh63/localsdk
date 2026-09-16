@@ -53,10 +53,10 @@ You set up **two roles** (they can be the same machine):
 #### A1. Prerequisites
 
 - **Python 3.10+** — check with `python --version`
-- **Ollama** — https://ollama.com/download
+- **Ollama** — https://ollama.com/download (can be on this machine or another one — see A4b)
 - **ngrok** — https://ngrok.com/download (skip if clients are on the same network)
 
-#### A2. Pull the model
+#### A2. Pull the model (on the Ollama machine)
 
 ```bash
 ollama pull qwen2.5:14b          # ~9 GB, this takes a while
@@ -115,6 +115,55 @@ Then edit `.env`:
 > ```bash
 > python -c "import secrets; print('sk-' + secrets.token_urlsafe(32))"
 > ```
+
+#### A4b. If Ollama runs on a different machine
+
+Common setup: Ollama sits on the GPU box, the FastAPI server runs somewhere
+else. Two things must change, and **both are easy to miss** because the failure
+looks identical either way (`"ollama":"down"`, then 502s).
+
+**1. Make Ollama listen beyond its own loopback.** By default it binds
+`127.0.0.1` only and will refuse every remote connection. On the *Ollama*
+machine set `OLLAMA_HOST` and restart it:
+
+| OS | how |
+| --- | --- |
+| Linux (systemd) | `sudo systemctl edit ollama` then add `Environment="OLLAMA_HOST=0.0.0.0"`, then `sudo systemctl restart ollama` |
+| macOS | `launchctl setenv OLLAMA_HOST "0.0.0.0"` then restart the Ollama app |
+| Windows | set a user environment variable `OLLAMA_HOST=0.0.0.0`, then quit and reopen Ollama from the tray |
+| any, foreground | `OLLAMA_HOST=0.0.0.0 ollama serve` |
+
+**2. Point the server at that machine's address, not `localhost`.** Find the
+Ollama machine's LAN IP (`ip addr` / `ifconfig` / `ipconfig`), then in
+`server/.env`:
+
+```bash
+OLLAMA_BASE_URL=http://192.168.1.50:11434     # the OTHER machine's IP
+```
+
+`localhost` in that variable means *the machine running the FastAPI server*, so
+leaving it as the default points the server at itself and nothing answers.
+
+**Verify from the server machine before starting anything else:**
+
+```bash
+curl http://192.168.1.50:11434/api/tags
+```
+
+If that hangs or is refused, stop here and fix it — the FastAPI server cannot
+work until this call does. Usual causes, in order: `OLLAMA_HOST` not set or
+Ollama not restarted after setting it; a host firewall blocking port 11434
+(on Windows, allow it through Defender); the two machines on different subnets
+or with client isolation enabled on the Wi-Fi.
+
+> **The model lives on the Ollama machine, not this one.** Run
+> `ollama pull qwen2.5:14b` (and `nomic-embed-text` if you need embeddings)
+> over there. Nothing is downloaded on the server box.
+
+> **This link is unencrypted and unauthenticated.** Ollama has no auth of its
+> own, so anyone who can reach port 11434 can use the model. Keep it on a
+> trusted LAN, or restrict the port to the server machine's IP. Do not bind
+> `0.0.0.0` on a machine with a public IP.
 
 #### A5. Run it
 
@@ -453,6 +502,7 @@ These are not incidental; they shaped the design:
 | `UpstreamError` (502) | Ollama not running | start Ollama, check `OLLAMA_BASE_URL` |
 | `UpstreamError` (504) | generation exceeded the timeout | raise `REQUEST_TIMEOUT_S`, or use `stream()` |
 | `healthz` says `"ollama":"down"` | server is up, Ollama is not | start Ollama |
+| `"ollama":"down"` with Ollama on another machine | `OLLAMA_BASE_URL` still says `localhost`, or Ollama is bound to 127.0.0.1 | see A4b: set `OLLAMA_HOST=0.0.0.0`, use the LAN IP |
 
 ## Roadmap — not in v1
 
