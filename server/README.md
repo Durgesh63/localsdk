@@ -19,8 +19,8 @@ calling, structured output, and the OpenAI error envelope.
 
 ```bash
 cd server
-python -m venv .venv && . .venv/Scripts/activate    # Windows; use bin/activate on POSIX
-python -m venv .venv
+python -m venv venv && . venv/Scripts/activate    # Windows; use bin/activate on POSIX
+python -m venv venv
 .\venv\Scripts\Activate.ps1   # Windows PowerShell
 # source .venv/bin/activate         # Linux / macOS
 pip install -r requirements-dev.txt
