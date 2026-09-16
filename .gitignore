@@ -1,0 +1,76 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+sdist/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# --- Virtual environments ---
+.venv/
+venv/
+ENV/
+env/
+.python-version
+
+# --- Secrets / local config ---
+# .env.example IS tracked on purpose - it is the documented template.
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+.localsdk/
+
+# --- Test / type / lint caches ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+.tox/
+.nox/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+*.cover
+
+# --- Temp / scratch / logs ---
+tmp/
+temp/
+scratch/
+scratchpad/
+*.tmp
+*.temp
+*.log
+*.bak
+*.orig
+*.rej
+*~
+*.swp
+*.swo
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+*.sublime-*
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Models / data (never commit weights) ---
+*.gguf
+*.bin
+*.safetensors
+.ollama/
