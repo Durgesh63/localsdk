@@ -232,6 +232,24 @@ curl http://localhost:8000/v1/chat/completions \
 If `healthz` reports `"ollama":"down"`, the server is fine and Ollama is not —
 check `OLLAMA_BASE_URL` and that Ollama is actually running.
 
+**Or use the built-in Swagger UI** at <http://localhost:8000/docs> - usually
+the fastest way to sanity-check a new deployment, since it needs no client
+and no curl.
+
+1. Open `/docs`
+2. Click **Authorize** (top right)
+3. Paste a key from your `API_KEYS` - **the key alone, without the word
+   `Bearer`**; Swagger adds that itself
+4. Click Authorize, then Close. Every request from the page now carries it.
+5. Expand any endpoint, click **Try it out**, then **Execute**
+
+The padlock icons show which routes need a key: `/v1/*` do, `/healthz` does
+not. A 401 with `"code": "invalid_api_key"` means the key is not in the
+server's `API_KEYS`; restart the server after editing `.env`.
+
+> Streaming responses do not render usefully in Swagger - it waits for the
+> whole body. Use `stream: false` there, or curl for streaming.
+
 #### A6. Expose it with ngrok
 
 ```bash

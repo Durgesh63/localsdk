@@ -37,6 +37,14 @@ ollama pull qwen2.5:14b
 ollama pull nomic-embed-text
 ```
 
+## Swagger UI
+
+<http://localhost:8000/docs> has an **Authorize** button: paste a key from
+`API_KEYS` (the key alone - Swagger prepends `Bearer`) and every request from
+the page is authenticated. Padlocks mark the routes that require it.
+
+Streaming responses do not render usefully there; use `stream: false` or curl.
+
 `/healthz` never fails on account of Ollama — it reports `"ollama": "down"` and
 still returns 200, because it is a probe, not a gate.
 
