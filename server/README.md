@@ -22,7 +22,7 @@ cd server
 python -m venv .venv && . .venv/Scripts/activate    # Windows; use bin/activate on POSIX
 pip install -e ".[dev]"
 
-cp .env.example .env        # then edit API_KEYS
+cp .env.example .env        # then set API_KEYS - it ships empty on purpose
 uvicorn app.main:app --reload
 ```
 
@@ -55,7 +55,7 @@ network connection.
 | `DEFAULT_MODEL` | `qwen2.5:14b` | used when a request omits `model` |
 | `EMBED_MODEL` | `nomic-embed-text` | used by `/v1/embeddings` |
 | `KEYSTORE_BACKEND` | `static` | `static` \| `postgres` (postgres is a v1 stub) |
-| `API_KEYS` | — | comma-separated keys accepted by the `static` backend |
+| `API_KEYS` | **none** | **Required.** Comma-separated keys for the `static` backend. The server refuses to start if empty. |
 | `DATABASE_URL` | — | reserved for the postgres backend |
 | `REQUEST_TIMEOUT_S` | `300` | upstream timeout; a 14B is slow, keep it generous |
 | `HOST` / `PORT` | `0.0.0.0` / `8000` | bind address for your own launcher |
@@ -92,7 +92,7 @@ Non-streaming:
 
 ```bash
 curl -s http://localhost:8000/v1/chat/completions \
-  -H "Authorization: Bearer sk-local-dev-001" \
+  -H "Authorization: Bearer sk-your-own-key" \
   -H "Content-Type: application/json" \
   -d '{
         "model": "qwen2.5:14b",
@@ -111,7 +111,7 @@ Streaming (`-N` disables curl's own buffering):
 
 ```bash
 curl -sN http://localhost:8000/v1/chat/completions \
-  -H "Authorization: Bearer sk-local-dev-001" \
+  -H "Authorization: Bearer sk-your-own-key" \
   -H "Content-Type: application/json" \
   -d '{
         "messages": [{"role": "user", "content": "Count to three."}],
@@ -133,7 +133,7 @@ Embeddings:
 
 ```bash
 curl -s http://localhost:8000/v1/embeddings \
-  -H "Authorization: Bearer sk-local-dev-001" \
+  -H "Authorization: Bearer sk-your-own-key" \
   -H "Content-Type: application/json" \
   -d '{"input": ["first", "second"]}'
 ```
@@ -142,7 +142,7 @@ Tool calling — the returned `function.arguments` is a **JSON-encoded string**:
 
 ```bash
 curl -s http://localhost:8000/v1/chat/completions \
-  -H "Authorization: Bearer sk-local-dev-001" \
+  -H "Authorization: Bearer sk-your-own-key" \
   -H "Content-Type: application/json" \
   -d '{
         "messages": [{"role": "user", "content": "Weather in Pune?"}],

@@ -101,13 +101,20 @@ Then edit `.env`:
 | `DEFAULT_MODEL` | `qwen2.5:14b` | chat model used when a request omits `model` |
 | `EMBED_MODEL` | `nomic-embed-text` | embedding model used when a request omits `model` |
 | `KEYSTORE_BACKEND` | `static` | `static` (env vars, no DB) or `postgres` (not implemented yet) |
-| `API_KEYS` | — | **comma-separated list of valid keys.** Change these. |
+| `API_KEYS` | **none** | **Required.** Comma-separated keys clients must send. No default: the server refuses to start if this is empty. |
 | `REQUEST_TIMEOUT_S` | `300` | read timeout for a generation. A 14B is slow; do not lower this much |
 | `HOST` / `PORT` | `0.0.0.0` / `8000` | where the server listens |
 
-> **Change `API_KEYS` before exposing anything.** Anyone holding a key can spend
-> your GPU. Generate real ones with:
-> `python -c "import secrets; print('sk-' + secrets.token_urlsafe(32))"`
+> **You must set `API_KEYS` yourself.** Nothing is shipped in `.env.example`,
+> and there is no fallback — the server exits with an explanatory error if it
+> is empty. That is deliberate: a default key published in a public repo is a
+> key everyone has. Anyone holding a valid key can spend your GPU.
+>
+> Generate one per app or developer, so you can revoke them individually:
+>
+> ```bash
+> python -c "import secrets; print('sk-' + secrets.token_urlsafe(32))"
+> ```
 
 #### A5. Run it
 
@@ -122,7 +129,7 @@ curl http://localhost:8000/healthz
 # {"status":"ok","ollama":"up","model":"qwen2.5:14b","version":"0.1.0"}
 
 curl http://localhost:8000/v1/chat/completions \
-  -H "Authorization: Bearer sk-local-dev-001" \
+  -H "Authorization: Bearer sk-your-own-key" \
   -H "Content-Type: application/json" \
   -d '{"messages":[{"role":"user","content":"say hi"}]}'
 ```
@@ -177,13 +184,13 @@ Resolution order is **explicit argument → environment variable → config file
 ```python
 from localsdk import Client
 
-client = Client(api_key="sk-local-dev-001", base_url="https://a1b2.ngrok-free.app")
+client = Client(api_key="sk-your-own-key", base_url="https://a1b2.ngrok-free.app")
 ```
 
 **2. Environment variables** (best for servers and containers):
 
 ```bash
-export LOCALSDK_API_KEY=sk-local-dev-001
+export LOCALSDK_API_KEY=sk-your-own-key
 export LOCALSDK_BASE_URL=https://a1b2.ngrok-free.app
 export LOCALSDK_MODEL=qwen2.5:14b        # optional
 export LOCALSDK_TIMEOUT=300              # optional
@@ -198,7 +205,7 @@ client = Client()          # picks everything up from the environment
 
 ```toml
 [default]
-api_key  = "sk-local-dev-001"
+api_key  = "sk-your-own-key"
 base_url = "https://a1b2.ngrok-free.app"
 model    = "qwen2.5:14b"
 ```

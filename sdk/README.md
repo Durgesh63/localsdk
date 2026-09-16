@@ -9,7 +9,7 @@ Async core, sync mirror, no heavyweight dependencies — just `httpx` and
 ```python
 from localsdk import Client
 
-client = Client(api_key="sk-local-dev-001", base_url="https://xxxx.ngrok-free.app")
+client = Client(api_key="sk-your-own-key", base_url="https://xxxx.ngrok-free.app")
 print(client.chat([{"role": "user", "content": "hello"}]).text)
 ```
 
@@ -52,7 +52,7 @@ explicit argument  >  environment variable  >  ~/.localsdk/config.toml  >  defau
 ```toml
 # ~/.localsdk/config.toml
 [default]
-api_key  = "sk-local-dev-001"
+api_key  = "sk-your-own-key"
 base_url = "https://xxxx.ngrok-free.app"
 model    = "qwen2.5:14b"
 ```

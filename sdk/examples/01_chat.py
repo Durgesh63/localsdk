@@ -1,7 +1,7 @@
 """Example 1 -- a single chat completion.
 
 Run:
-    export LOCALSDK_API_KEY=sk-local-dev-001
+    export LOCALSDK_API_KEY=sk-your-own-key
     export LOCALSDK_BASE_URL=https://<current>.ngrok-free.app
     python examples/01_chat.py
 

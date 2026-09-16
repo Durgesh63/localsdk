@@ -104,6 +104,15 @@ def build_keystore(settings: Settings) -> KeyStore:
     """Pick a key store from ``KEYSTORE_BACKEND``."""
     backend = (settings.keystore_backend or "static").strip().lower()
     if backend == "static":
+        if not settings.api_key_list:
+            raise RuntimeError(
+                "API_KEYS is empty, so the static key store holds no keys "
+                "and every request would be rejected with 401. Set API_KEYS "
+                "in server/.env to a comma-separated list of your own keys. "
+                "Generate one with: "
+                "python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+                " and prefix it with sk-"
+            )
         return StaticKeyStore.from_settings(settings)
     if backend == "postgres":
         return PostgresKeyStore.from_settings(settings)

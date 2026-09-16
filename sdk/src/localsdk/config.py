@@ -15,7 +15,7 @@ Environment variables (derived from :data:`localsdk._version.ENV_PREFIX`)::
 Config file ``~/.localsdk/config.toml``::
 
     [default]
-    api_key = "sk-local-dev-001"
+    api_key = "sk-your-own-key"
     base_url = "https://xxxx.ngrok-free.app"
     model = "qwen2.5:14b"
 """
