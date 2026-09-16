@@ -80,12 +80,58 @@ curl http://localhost:11434/api/tags
 
 #### A3. Install the server
 
+**Always use a virtual environment.** It keeps these dependencies out of your
+system Python, so nothing here can break another project on the machine.
+
+**Create it** (once, from the `server/` directory):
+
 ```bash
 cd server
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+```
+
+**Activate it** (every new terminal - the prompt gains a `(.venv)` prefix):
+
+| shell | command |
+| --- | --- |
+| Windows PowerShell | `.venv\Scripts\Activate.ps1` |
+| Windows cmd | `.venv\Scripts\activate.bat` |
+| Linux / macOS | `source .venv/bin/activate` |
+
+> On PowerShell, activation may fail with *"running scripts is disabled on
+> this system"*. Allow it once for your user:
+> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+
+**Install the dependencies:**
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+That pulls in the runtime packages plus the test tools. For a deployment that
+never runs tests, `pip install -r requirements.txt` is enough.
+
+<details>
+<summary>Alternative: install from <code>pyproject.toml</code> instead</summary>
+
+```bash
 pip install -e ".[dev]"
 ```
+
+`pyproject.toml` is the authoritative dependency list; `requirements.txt`
+mirrors it for the conventional pip workflow. Either works - use one.
+</details>
+
+**Confirm it worked:**
+
+```bash
+python -m pytest        # 46 passed
+```
+
+The suite needs no Ollama and no network, so a green run here proves the
+install is sound before you involve any other machine.
+
+**To leave the environment later:** `deactivate`.
 
 #### A4. Configure
 

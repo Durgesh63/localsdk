@@ -21,11 +21,16 @@ print(client.chat([{"role": "user", "content": "hello"}]).text)
 pip install "git+https://github.com/Durgesh63/localsdk.git#subdirectory=sdk"
 ```
 
-From a checkout:
+From a checkout (for working on the SDK itself):
 
 ```bash
 cd sdk
-pip install -e ".[dev]"
+python -m venv .venv
+.\venv\Scripts\Activate.ps1   # Windows PowerShell
+# source .venv/bin/activate         # Linux / macOS
+pip install -r requirements-dev.txt
+pip install -e .                    # the package itself, editable
+python -m pytest                    # 113 passed
 ```
 
 Python 3.10+. On 3.10 add the `toml` extra if you want the config file to be
