@@ -35,8 +35,8 @@ dev = [
 toml = ["tomli>=2.0; python_version < '3.11'"]
 
 [project.urls]
-Homepage = "https://github.com/your-org/localsdk"
-Source = "https://github.com/your-org/localsdk"
+Homepage = "https://github.com/Durgesh63/localsdk"
+Source = "https://github.com/Durgesh63/localsdk"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/localsdk"]

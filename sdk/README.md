@@ -18,7 +18,7 @@ print(client.chat([{"role": "user", "content": "hello"}]).text)
 ## Install
 
 ```bash
-pip install "git+https://github.com/your-org/localsdk.git#subdirectory=sdk"
+pip install "git+https://github.com/Durgesh63/localsdk.git#subdirectory=sdk"
 ```
 
 From a checkout:
