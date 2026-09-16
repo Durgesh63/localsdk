@@ -161,16 +161,49 @@ Sends `response_format={"type": "json_schema", ...}` and validates the reply.
 Unparseable or non-conforming JSON raises `StructuredOutputError`, with the raw
 text on `.text`.
 
-### 5. Embeddings, models, health
+### 5. Embeddings
+
+**Setup first.** Embeddings use a *different model* from chat, and it is a
+separate download. On the machine running Ollama:
+
+```bash
+ollama pull nomic-embed-text      # ~270 MB
+```
+
+Until that exists, `embed()` raises `NotFoundError` (404). Chat, streaming,
+tools and structured output are unaffected - they use the chat model. Nothing
+needs redeploying afterwards: the server resolves the model per request.
 
 ```python
-client.embed("one string")        # [[0.1, 0.2, ...]]
-client.embed(["a", "b"])          # [[...], [...]]
+client.embed("one string")        # -> [[0.1, 0.2, ...]]   always a LIST of vectors
+client.embed(["a", "b"])          # -> [[...], [...]]
+client.embed(texts, model="mxbai-embed-large")   # override per call
+```
+
+Embeddings do not generate text. They turn text into a fixed-length vector
+whose *distance* to another vector reflects how related the two texts are -
+which is what makes semantic search possible.
+
+**Batch your calls.** `embed()` takes a list, and one call with 200 texts costs
+one request where a loop would cost 200. That matters on a metered tunnel.
+Better still, run an indexing pass *on the server machine itself* against
+`http://localhost:8000` so only the per-question embedding crosses the network.
+
+The SDK gives you vectors, not a vector store - see
+[examples/05_rag.py](examples/05_rag.py) for the full
+chunk to embed to search to answer loop in dependency-free Python.
+
+### 6. Models and health
+
+```python
 client.models()                   # [Model(id="qwen2.5:14b", ...)]
 
 health = client.health()          # GET /healthz, no auth
 health.ok                         # True only if the server AND ollama are up
 ```
+
+Because `/healthz` needs no auth, a green health check does **not** mean your
+API key is valid.
 
 ---
 

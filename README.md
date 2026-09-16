@@ -311,17 +311,49 @@ Ollama has no true "strict" mode, so the SDK validates the reply and raises
 `StructuredOutputError` if the model returns something unparseable. With a 14B,
 treat that as a normal occasional outcome — catch it and retry.
 
-### 5. Embeddings
+### 5. Embeddings and RAG
 
-Requires `ollama pull nomic-embed-text` (see A2).
+Embeddings use a **different model** from chat, downloaded separately. On the
+Ollama machine:
+
+```bash
+ollama pull nomic-embed-text      # ~270 MB
+```
+
+That is the whole setup. `EMBED_MODEL` in `server/.env` already points at it,
+and the server resolves the model per request - no redeploy, no restart. Until
+you pull it, `embed()` raises `NotFoundError` and nothing else is affected.
 
 ```python
 vectors = client.embed(["first document", "second document"])
 len(vectors[0])     # 768 floats
 ```
 
-These are for semantic search / RAG: embed your documents once, embed the
-question, retrieve the nearest chunks, then paste those into a chat prompt.
+Embeddings generate no text. They convert text to a vector whose distance to
+another vector reflects how related the two texts are - the basis of semantic
+search. The full retrieval loop looks like this:
+
+```
+your docs --chunk--> client.embed(chunks) --> store the vectors
+                                                     |
+question --client.embed(q)--> cosine similarity <----+
+                                                     |
+                 best chunks --> client.chat(prompt + chunks) --> answer
+```
+
+The SDK provides the embedding calls; **it does not provide a vector store** -
+that was out of scope for v1. For a first version a plain Python list plus a
+dot product is enough; past a few thousand chunks, use Chroma or pgvector.
+A complete dependency-free implementation is in
+[sdk/examples/05_rag.py](sdk/examples/05_rag.py).
+
+**Two cost notes**, both specific to running behind free ngrok:
+
+- `embed()` accepts a list. One call with 200 texts costs one request; a loop
+  costs 200.
+- Run the initial indexing pass **on the server machine** against
+  `http://localhost:8000`, bypassing the tunnel entirely. Only the
+  per-question embedding then needs to cross ngrok.
 
 ### Async
 
